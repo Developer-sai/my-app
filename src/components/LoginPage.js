@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Install axios: `npm install axios`
 import './LoginPage.css';
 
 const LoginPage = () => {
-  const [view, setView] = useState('login'); // 'login', 'signup', 'forgotPassword'
+  const [view, setView] = useState('login');
 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -14,20 +15,32 @@ const LoginPage = () => {
   const [signupPhone, setSignupPhone] = useState('');
 
   const [forgotPhone, setForgotPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+1'); // Default to US
+  const [countryCode, setCountryCode] = useState('+1');
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    alert(`Login:\nUsername: ${loginUsername}\nPassword: ${loginPassword}`);
+    try {
+      const response = await axios.post('http://localhost:5000/login', { username: loginUsername, password: loginPassword });
+      localStorage.setItem('token', response.data.token);
+      window.location.href = 'https://highlightcards.co.uk';
+    } catch (error) {
+      alert('Invalid credentials');
+    }
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
     if (signupPassword !== signupConfirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    alert(`Signup:\nUsername: ${signupUsername}\nEmail: ${signupEmail}\nPhone: ${signupPhone}`);
+    try {
+      await axios.post('http://localhost:5000/signup', { username: signupUsername, email: signupEmail, password: signupPassword, phone: signupPhone });
+      alert('Sign up successful');
+      setView('login');
+    } catch (error) {
+      alert(error.response.data);
+    }
   };
 
   const handleForgotPasswordSubmit = (e) => {
@@ -184,3 +197,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
